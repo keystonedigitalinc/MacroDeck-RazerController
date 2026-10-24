@@ -161,3 +161,7 @@ local-feed/*
 !local-feed/.gitkeep
 .superpowers/
 artifacts/
+tools/icon-pack/raw/
+tools/icon-pack/svg/
+tools/icon-pack/webpenc/bin/
+tools/icon-pack/webpenc/obj/
