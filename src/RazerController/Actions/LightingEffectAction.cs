@@ -111,6 +111,49 @@ internal sealed class LightingEffectAction(SynapseService synapse) : IDynamicOpt
 		};
 	}
 
+	/// <summary>
+	/// Synapse has no "off" effect: its Off switches the profile's lighting brightness off and keeps the level and the
+	/// effect. Effect 0 sent as a quick effect shows Fire on some keyboards, so Off goes through brightness instead.
+	/// </summary>
+	internal const int Off = 0;
+
+	/// <summary>Switches the profile's lighting on or off, keeping its brightness level.</summary>
+	internal static Task<CommandOutcome> SetLightingAsync(SynapseService synapse, string serial, bool on, CancellationToken ct) =>
+		synapse.SendAndConfirmAsync(serial, current =>
+		{
+			if (current.Brightness is not { } now) return DevicePlan.Invalid;
+			if (on == now > 0) return DevicePlan.NoChange;
+
+			var level = current.BrightnessLevel is int saved and > 0 ? saved : 100;
+			return DevicePlan.Send("ON_SET_BRIGHTNESS", new { brightness = new { isEnabled = on, value = level } }, latest => latest.Brightness > 0 == on);
+		}, ct);
+
+	/// <summary>Sets <paramref name="id"/> on the device: Off switches the lighting off; any effect also switches it back on.</summary>
+	internal static async Task<CommandOutcome> ApplyAsync(SynapseService synapse, string serial, Func<RazerDeviceInfo, int> pick, IReadOnlyDictionary<string, object> parameters, CancellationToken ct)
+	{
+		if (synapse.FindBySerial(serial) is { } device && pick(device) == Off) return await SetLightingAsync(synapse, serial, on: false, ct).ConfigureAwait(false);
+
+		var outcome = await synapse.SendAndConfirmAsync(serial, current =>
+		{
+			var id = pick(current);
+			if (id == Off) return DevicePlan.Invalid;
+
+			var setting = Setting(id, parameters);
+			object effectSetting = setting is null
+				? new { selectedEffectId = id }
+				: new { selectedEffectId = id, selectedEffectSetting = setting };
+
+			return DevicePlan.Send("ON_SET_EFFECTS", new { effectSetting }, latest => Matches(latest.Effect, id, setting));
+		}, ct).ConfigureAwait(false);
+
+		if (outcome is CommandOutcome.Applied or CommandOutcome.NoChange && synapse.FindBySerial(serial) is { Brightness: 0 })
+		{
+			return await SetLightingAsync(synapse, serial, on: true, ct).ConfigureAwait(false);
+		}
+
+		return outcome;
+	}
+
 	/// <summary>Whether <paramref name="effect"/> shows what was asked: the effect, and every setting field that was sent.</summary>
 	internal static bool Matches(LightingEffect? effect, int id, Dictionary<string, object>? setting) =>
 		effect?.Id == id
@@ -141,18 +184,7 @@ internal sealed class LightingEffectAction(SynapseService synapse) : IDynamicOpt
 				return ActionResult.Failed(ActionErrorCodes.ProviderRejected, Strings.Actions.Errors.Unsupported());
 			}
 
-			var setting = Setting(id, context.Parameters);
-			object effectSetting = setting is null
-				? new { selectedEffectId = id }
-				: new { selectedEffectId = id, selectedEffectSetting = setting };
-
-			var outcome = await synapse.SendAndConfirmAsync(
-				device.Serial,
-				"ON_SET_EFFECTS",
-				new { effectSetting },
-				current => Matches(current.Effect, id, setting),
-				context.CancellationToken).ConfigureAwait(false);
-
+			var outcome = await ApplyAsync(synapse, device.Serial, _ => id, context.Parameters, context.CancellationToken).ConfigureAwait(false);
 			return DeviceOptions.ToResult(outcome);
 		}
 	}

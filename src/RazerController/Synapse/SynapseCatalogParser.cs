@@ -94,7 +94,8 @@ internal static class SynapseCatalogParser
 			activeProfile is { } active ? ReadEffect(active) : null,
 			activeProfile is { } active2 ? ReadGamingMode(active2) : null,
 			activeProfile is { } active3 ? ReadBrightness(active3) : null,
-			activeProfile is { } active4 ? ReadDpiStages(active4) : null);
+			activeProfile is { } active4 ? ReadDpiStages(active4) : null,
+			activeProfile is { } active5 && active5.TryGetProperty("brightness", out var level) ? ReadInt(level, "value") : null);
 	}
 
 	private static LightingEffect? ReadEffect(JsonElement profile)
