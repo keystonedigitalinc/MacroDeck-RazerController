@@ -50,7 +50,7 @@ Chroma lighting does not use the debug port. It talks to the Razer Chroma SDK's 
 
 Each Synapse action waits until Synapse confirms the change, about 1.5 seconds at most. Otherwise it reports "Synapse did not apply the change".
 
-After a profile switch or a DPI stage change made through Synapse, Synapse shows its own on-screen popup ("Profile: <name>", or "DPI Stage <n>" with the DPI bar), the same popup it shows for the mouse's DPI buttons. It disappears after 3 seconds.
+After a profile switch or a DPI stage change made through Synapse, Synapse shows its own on-screen popup ("Profile: <name>", or "DPI Stage <n>" with the DPI bar), the same popup it shows for the mouse's DPI buttons. It disappears after 3 seconds. Turn it off with **Show Synapse popups** in the plugin's settings.
 
 ## Variables
 

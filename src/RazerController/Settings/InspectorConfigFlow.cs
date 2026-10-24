@@ -17,6 +17,7 @@ internal sealed class InspectorConfigFlow(IAutostartRegistry registry, SynapseSe
 	private const string StepId = "inspector";
 	private const string EnabledField = "enabled";
 	private const string RestartField = "restart";
+	private const string PopupsField = "popups";
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken) =>
 		Task.FromResult(ConfigFlowResult.Step(BuildStep()));
@@ -30,6 +31,7 @@ internal sealed class InspectorConfigFlow(IAutostartRegistry registry, SynapseSe
 		}
 
 		var enable = ReadBool(input, EnabledField);
+		synapse.Popups.Enabled = !input.ContainsKey(PopupsField) || ReadBool(input, PopupsField);
 		intent.Set(enable);
 		var updated = enable ? AutostartCommandLine.AppendFlag(current, InspectFlag) : AutostartCommandLine.RemoveFlag(current, InspectFlag);
 		if (updated != current)
@@ -86,6 +88,7 @@ internal sealed class InspectorConfigFlow(IAutostartRegistry registry, SynapseSe
 			[
 				ActionParameter.Toggle(EnabledField, label: Strings.Settings.Inspector.Enabled.Label(), description: Strings.Settings.Inspector.Enabled.Description(), defaultValue: enabled),
 				ActionParameter.Toggle(RestartField, label: Strings.Settings.Inspector.Restart.Label(), description: Strings.Settings.Inspector.Restart.Description(), defaultValue: false),
+				ActionParameter.Toggle(PopupsField, label: Strings.Settings.Inspector.Popups.Label(), description: Strings.Settings.Inspector.Popups.Description(), defaultValue: synapse.Popups.Enabled),
 			],
 		};
 	}

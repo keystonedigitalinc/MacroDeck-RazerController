@@ -89,10 +89,13 @@ internal sealed class SynapseService : BackgroundService
 		}
 	}
 
-	/// <summary>Shows Synapse's own popup for a change the plugin made. A popup that fails is only logged.</summary>
+	/// <summary>The user's choice on Synapse popups; the settings screen changes it.</summary>
+	public IPopupPreference Popups { get; set; } = new MemoryPopupPreference();
+
+	/// <summary>Shows Synapse's own popup for a change the plugin made, unless the user turned popups off. A popup that fails is only logged.</summary>
 	public async Task ShowPopupAsync(RazerDeviceInfo device, string header, int? dpi, int? dpiPercentage, CancellationToken cancellationToken)
 	{
-		if (!IsReachable) return;
+		if (!IsReachable || !Popups.Enabled) return;
 
 		try
 		{

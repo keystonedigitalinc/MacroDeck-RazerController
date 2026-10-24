@@ -154,3 +154,23 @@ public sealed class SynapsePopupTests
 		Assert.That(afterTarget[(int)reader.BytesConsumed..].TrimStart(), Does.StartWith(";"));
 	}
 }
+
+[TestFixture]
+public sealed class PopupPreferenceTests
+{
+	[Test]
+	public void Popups_are_on_until_turned_off_and_the_choice_survives()
+	{
+		var directory = Path.Combine(Path.GetTempPath(), "razer-popups-" + Guid.NewGuid().ToString("N"));
+		try
+		{
+			Assert.That(new FilePopupPreference(directory).Enabled, Is.True);
+			new FilePopupPreference(directory).Enabled = false;
+			Assert.That(new FilePopupPreference(directory).Enabled, Is.False);
+		}
+		finally
+		{
+			if (Directory.Exists(directory)) Directory.Delete(directory, recursive: true);
+		}
+	}
+}

@@ -292,6 +292,12 @@
   <data name="Settings.Inspector.Enabled.Description" xml:space="preserve">
     <value>Lets the plugin switch profiles, set lighting and brightness, and toggle gaming mode through Synapse's debug port. Turning it off removes the flag from Synapse's startup entry again. Mouse DPI and Chroma lighting work without it.</value>
   </data>
+  <data name="Settings.Inspector.Popups.Label" xml:space="preserve">
+    <value>Show Synapse popups</value>
+  </data>
+  <data name="Settings.Inspector.Popups.Description" xml:space="preserve">
+    <value>After a profile switch or a DPI stage change from Macro Deck, Synapse shows its own on-screen popup for 3 seconds.</value>
+  </data>
   <data name="Settings.Inspector.Restart.Label" xml:space="preserve">
     <value>Restart Synapse when I save</value>
   </data>
