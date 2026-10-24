@@ -23,4 +23,11 @@ internal static class DpiStepper
 
 		return ordered[target].Id;
 	}
+
+	/// <summary>The stage with the 1-based <paramref name="number"/> in DPI order, as the stage variable counts, or null.</summary>
+	public static byte? StageAt(DpiStages stages, int number)
+	{
+		var ordered = stages.Stages.OrderBy(stage => stage.X).ToList();
+		return number >= 1 && number <= ordered.Count ? ordered[number - 1].Id : null;
+	}
 }

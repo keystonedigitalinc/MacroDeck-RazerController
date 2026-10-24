@@ -4,7 +4,7 @@
 		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 		<CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
 		<!-- Pinned: unlisted 3.0.0-preview.* packages outrank beta.15 under SemVer, so a float is unsafe. -->
-		<MacroDeckSdkVersion Condition="'$(MacroDeckSdkVersion)' == ''">3.0.0-beta.17</MacroDeckSdkVersion>
+		<MacroDeckSdkVersion Condition="'$(MacroDeckSdkVersion)' == ''">3.0.0-beta.18</MacroDeckSdkVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -25,8 +25,11 @@ internal enum CommandOutcome
 	Invalid,
 }
 
-/// <summary>What to send, decided from the device's state at the moment the command runs.</summary>
-internal sealed record DevicePlan(string? EventType, object? Payload, Func<RazerDeviceInfo, bool>? IsApplied, CommandOutcome? Shortcut)
+/// <summary>
+/// What to send, decided from the device's state at the moment the command runs. <see cref="WindowUpdate"/>, when
+/// set, is posted to the device's Synapse window after the command, so an open window shows the change at once.
+/// </summary>
+internal sealed record DevicePlan(string? EventType, object? Payload, Func<RazerDeviceInfo, bool>? IsApplied, CommandOutcome? Shortcut, WindowUpdate? WindowUpdate = null)
 {
 	public static DevicePlan NoChange { get; } = new(null, null, null, CommandOutcome.NoChange);
 
@@ -34,6 +37,9 @@ internal sealed record DevicePlan(string? EventType, object? Payload, Func<Razer
 
 	public static DevicePlan Send(string eventType, object payload, Func<RazerDeviceInfo, bool> isApplied) => new(eventType, payload, isApplied, null);
 }
+
+/// <summary>A Redux action for the device's Synapse window, in the form Synapse's own device handler sends it.</summary>
+internal sealed record WindowUpdate(string Type, object Payload);
 
 internal static class SynapseStatusText
 {

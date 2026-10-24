@@ -31,5 +31,11 @@
     "interaction": false,
     "generatedContent": false,
     "generatedAssets": true
-  }
+  },
+  "bundledIconPacks": [
+    {
+      "key": "icons",
+      "path": "icon-packs/icons.macroDeckIconPack"
+    }
+  ]
 }

@@ -10,6 +10,7 @@ internal enum DpiOutcome
 {
 	Applied,
 	NoMouse,
+	NoSuchStage,
 	Failed,
 }
 
@@ -52,6 +53,18 @@ internal sealed class MouseDpiService : IDisposable
 			if (stages is null || dpi is null) return DpiOutcome.Failed;
 
 			if (DpiStepper.NextStage(stages, dpi.Value.X, up) is { } stage && !mouse.SetActiveStage(stage)) return DpiOutcome.Failed;
+
+			Publish(mouse);
+			return DpiOutcome.Applied;
+		}, cancellationToken);
+
+	public Task<DpiOutcome> GoToStageAsync(int number, CancellationToken cancellationToken) =>
+		RunAsync(mouse =>
+		{
+			var stages = mouse.ReadStages();
+			if (stages is null) return DpiOutcome.Failed;
+			if (DpiStepper.StageAt(stages, number) is not { } stage) return DpiOutcome.NoSuchStage;
+			if (!mouse.SetActiveStage(stage)) return DpiOutcome.Failed;
 
 			Publish(mouse);
 			return DpiOutcome.Applied;

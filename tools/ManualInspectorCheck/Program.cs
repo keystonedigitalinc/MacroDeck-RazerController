@@ -48,6 +48,15 @@ if (args is ["--eval", var scriptPath, var outPath])
 	return 0;
 }
 
+//   --dpi   read the mouse's current DPI and stage over HID. Read only.
+if (args is ["--dpi"])
+{
+	using var dpi = KeystoneDigital.RazerController.Hid.MouseDpiService.CreateDefault(Serilog.Core.Logger.None);
+	await dpi.RefreshAsync(CancellationToken.None);
+	Console.WriteLine($"mouse dpi: {dpi.State?.ToString() ?? "no mouse answered"}");
+	return 0;
+}
+
 //   --lighting-live   keyboard brightness 50 and back, keyboard two-colour breathing and back, mouse wave up/down
 //                     and back. Changes the active profiles while it runs; restores each step.
 if (args is ["--lighting-live"])

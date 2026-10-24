@@ -71,16 +71,26 @@ internal static class InspectorScripts
 			try { const u = new URL(wc.getURL()); return u.origin === "https://apps.razer.com" && !u.pathname.includes("/mw/"); } catch (_) { return false; }
 		});
 		if (!sender) return { sent: false };
-		const script = "(() => { const t = " + JSON.stringify(target) + "; const bc = new BroadcastChannel(t.channel); bc.postMessage({ msgName: 'userCommand', msgData: { type: t.type, payload: t.payload } }); bc.close(); return true; })()";
+		const script = "(() => { const t = " + JSON.stringify(target) + "; const bc = new BroadcastChannel(t.channel); const data = { type: t.type, payload: t.payload }; if (t.window) data.timerTick = Date.now(); bc.postMessage({ msgName: 'userCommand', msgData: data }); bc.close(); if (t.window) { const ui = new BroadcastChannel(t.channel.replace(/_mw$/, '_ui')); ui.postMessage({ msgName: 'reduxStoreUpdate', msgData: t.window }); ui.close(); } return true; })()";
 		const sent = await sender.executeJavaScript(script, true);
 		return { sent: sent === true };
 		})()
 		""";
 
-	/// <summary>Posts Synapse's own userCommand envelope on a device's BroadcastChannel.</summary>
-	public static string Command(string channel, string eventType, object payload)
+	/// <summary>
+	/// Posts Synapse's own userCommand envelope on a device's BroadcastChannel. With <paramref name="window"/>, the
+	/// command carries a timerTick as Synapse's window sends it, and the update then goes to the device's "_ui"
+	/// channel: Synapse refreshes its open window only for changes made on the device itself.
+	/// </summary>
+	public static string Command(string channel, string eventType, object payload, WindowUpdate? window = null)
 	{
-		var target = JsonSerializer.Serialize(new { channel, type = eventType, payload });
+		var target = JsonSerializer.Serialize(new
+		{
+			channel,
+			type = eventType,
+			payload,
+			window = window is null ? null : new { type = window.Type, payload = window.Payload },
+		});
 
 		return CommandTemplate
 			.Replace("__IMPORT__", ImportSnippet, StringComparison.Ordinal)

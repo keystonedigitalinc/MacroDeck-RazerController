@@ -16,6 +16,7 @@ namespace KeystoneDigital.RazerController;
 public sealed class RazerIntegration : IPluginIntegration, IVariableProvider, IConfigFlowProvider
 {
 	private readonly MouseDpiService _dpi;
+	private readonly ChromaClient _chroma;
 	private readonly ISynapseProcess _process;
 
 	internal RazerIntegration(SynapseService synapse, MouseDpiService dpi, IAutostartRegistry autostart, ISynapseControlIntent intent, InspectorGuard guard, ISynapseProcess process, ChromaClient chroma)
@@ -24,6 +25,7 @@ public sealed class RazerIntegration : IPluginIntegration, IVariableProvider, IC
 		_process = process;
 		Intent = intent;
 		_dpi = dpi;
+		_chroma = chroma;
 		Synapse = synapse;
 		Autostart = autostart;
 		Actions =
@@ -32,9 +34,12 @@ public sealed class RazerIntegration : IPluginIntegration, IVariableProvider, IC
 			new LightingEffectAction(synapse),
 			new BrightnessAction(synapse),
 			new GamingModeAction(synapse),
-			new StepDpiAction(dpi),
+			new StepDpiAction(dpi, synapse),
 			new TemporaryDpiAction(dpi),
+			new DpiStageAction(dpi, synapse),
 			new ChromaLightingAction(chroma),
+			new CycleLightingAction(synapse),
+			new RestartSynapseAction(autostart, process),
 		];
 	}
 
@@ -64,7 +69,7 @@ public sealed class RazerIntegration : IPluginIntegration, IVariableProvider, IC
 	public IReadOnlyList<VariableDefinition> Variables => RazerVariables.Definitions;
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default) =>
-		ValueTask.FromResult(RazerVariables.Read(localId, Synapse, _dpi, Guard.Issue));
+		ValueTask.FromResult(RazerVariables.Read(localId, Synapse, _dpi, Guard.Issue, _chroma));
 
 	public bool RequiresConfiguration => false;
 

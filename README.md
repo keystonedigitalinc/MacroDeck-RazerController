@@ -7,7 +7,7 @@ Control Razer devices from Macro Deck 3 buttons while Razer Synapse 4 keeps runn
 - switch, step or cycle Synapse profiles on any Razer device
 - set a device's lighting effect in its Synapse profile, or use Chroma lighting (static, breathing, spectrum, wave, with brightness and speed) without Synapse control
 - toggle a keyboard's gaming mode
-- step or temporarily set the mouse's DPI
+- step the mouse's DPI, jump to a DPI stage, or set a temporary DPI
 
 Tested on a Razer Naga Trinity and a Razer Cynosa Chroma with Synapse 4.0.827.
 
@@ -42,8 +42,11 @@ Chroma lighting does not use the debug port. It talks to the Razer Chroma SDK's 
 | Synapse brightness (saved to profile) | Sets a device's lighting brightness in its Synapse profile, or makes it brighter or dimmer by a step. 0 switches the lighting off. Needs Synapse control |
 | Chroma lighting (temporary, no setup) | Static colour, Breathing (one or two colours), Spectrum cycling, Wave or Off, with brightness and speed, on all Razer devices or one device type, through the Razer Chroma SDK. The plugin draws the animated effects itself. Works without Synapse control. Needs the Chroma module in Synapse with Chroma apps allowed. The colour lasts while Macro Deck runs; **Synapse lighting (give control back)** returns to the profile |
 | Gaming mode | On, Off or Toggle. Gaming mode disables the Windows key |
-| Step mouse DPI | One DPI stage up or down within the active profile |
+| Step mouse DPI | One DPI stage up or down within the active profile. Through Synapse when Synapse control is on, so Synapse shows and saves it; otherwise directly on the mouse |
 | Temporary mouse DPI | A DPI value until the next profile switch or DPI step |
+| Go to mouse DPI stage | Jumps to stage 1 to 5 of the active profile, numbered as Synapse shows them. Through Synapse when Synapse control is on; otherwise directly on the mouse, counted from the lowest DPI |
+| Cycle Synapse lighting effects | Each press moves a device to the next of the effects you tick (Static, Breathing, Spectrum and Wave when none are ticked). Needs Synapse control |
+| Restart Razer Synapse | Closes Synapse and starts it again from its own startup entry, so a change to Synapse control applies. Runs only when you press it |
 
 Each Synapse action waits until Synapse confirms the change, about 1.5 seconds at most. Otherwise it reports "Synapse did not apply the change".
 
@@ -59,6 +62,9 @@ Each Synapse action waits until Synapse confirms the change, about 1.5 seconds a
 | `razer_keyboard_effect` | `Off`, `Static`, `Breathing`, `Spectrum`, `Wave`, `Reactive`, `Ripple` or `Starlight` |
 | `razer_keyboard_gaming_mode` | `true` or `false` |
 | `razer_keyboard_brightness` | Lighting brightness of the first keyboard, 0 to 100 |
+| `razer_mouse_dpi_stage_number` | Current mouse DPI stage as a number, `0` when on a temporary DPI |
+| `razer_mouse_effect` | Lighting effect of the first mouse, same values as `razer_keyboard_effect` |
+| `razer_chroma_effect` | `static`, `breathing`, `spectrum`, `wave` or `off` while Chroma lighting is shown, `synapse` while Synapse has the lighting |
 | `razer_mouse_brightness` | Lighting brightness of the first mouse, 0 to 100 |
 
 ## Troubleshooting by `razer_status`
