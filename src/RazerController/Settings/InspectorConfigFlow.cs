@@ -58,9 +58,11 @@ internal sealed class InspectorConfigFlow(IAutostartRegistry registry, SynapseSe
 			}
 		}
 
+		// The host keeps the submitted form and fills the screen from it next time. "enabled" stays the toggle's own
+		// true/false (a text "true" shows as off), and "restart" is stored as off so it never comes back ticked.
 		return ConfigFlowResult.Complete(
 			"Razer App Controller",
-			new Dictionary<string, ConfigFlowValue> { [EnabledField] = ConfigFlowValue.Plain(enable ? "true" : "false") });
+			new Dictionary<string, ConfigFlowValue> { [RestartField] = ConfigFlowValue.Plain("false") });
 	}
 
 	private ConfigFlowStep BuildStep()
