@@ -110,3 +110,17 @@ public sealed class SynapseDpiTests
 	public void No_ticked_effects_cycles_the_common_ones() =>
 		Assert.That(CycleLightingAction.Cycle(new Dictionary<string, object>()), Is.EqualTo(new[] { 1, 2, 3, 4 }));
 }
+
+[TestFixture]
+public sealed class RestartSynapseTests
+{
+	private const string Entry = @"""C:\Program Files\Razer\RazerAppEngine\RazerAppEngine.exe"" --autoStart=1";
+
+	[Test]
+	public void With_control_on_the_restart_puts_the_flag_back() =>
+		Assert.That(RestartSynapseAction.CommandLineFor(Entry, controlOn: true), Does.Contain(KeystoneDigital.RazerController.Settings.InspectorConfigFlow.InspectFlag));
+
+	[Test]
+	public void With_control_off_the_entry_is_used_as_it_is() =>
+		Assert.That(RestartSynapseAction.CommandLineFor(Entry, controlOn: false), Is.EqualTo(Entry));
+}

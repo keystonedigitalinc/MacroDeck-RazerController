@@ -1,5 +1,6 @@
 using System.Globalization;
 using KeystoneDigital.RazerController.Autostart;
+using KeystoneDigital.RazerController.Settings;
 using KeystoneDigital.RazerController.Synapse;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
@@ -99,10 +100,11 @@ internal sealed class CycleLightingAction(SynapseService synapse) : IDynamicOpti
 }
 
 /// <summary>
-/// Restarts Synapse with its own startup entry, so it comes back with Synapse control as the user set it. It runs
-/// only when the user presses the button; the plugin never restarts Synapse by itself.
+/// Restarts Synapse with its own startup entry, so it comes back with Synapse control as the user set it. Synapse
+/// sometimes drops the debug flag from that entry, so with control on the flag goes back in first, as the settings
+/// screen does. It runs only when the user presses the button; the plugin never restarts Synapse by itself.
 /// </summary>
-internal sealed class RestartSynapseAction(IAutostartRegistry registry, ISynapseProcess process) : IActionDefinition
+internal sealed class RestartSynapseAction(IAutostartRegistry registry, ISynapseProcess process, ISynapseControlIntent intent) : IActionDefinition
 {
 	public string Id => "restart-synapse";
 
@@ -114,21 +116,33 @@ internal sealed class RestartSynapseAction(IAutostartRegistry registry, ISynapse
 
 	public MacroDeckPlatform Platforms => MacroDeckPlatform.Windows;
 
-	public IActionExecutor CreateExecutor() => new Executor(registry, process);
+	public IActionExecutor CreateExecutor() => new Executor(registry, process, intent);
 
-	private sealed class Executor(IAutostartRegistry registry, ISynapseProcess process) : IActionExecutor
+	/// <summary>The startup entry to restart with: with control on, always carrying the debug flag.</summary>
+	internal static string CommandLineFor(string current, bool controlOn) =>
+		controlOn ? AutostartCommandLine.AppendFlag(current, InspectorConfigFlow.InspectFlag) : current;
+
+	private sealed class Executor(IAutostartRegistry registry, ISynapseProcess process, ISynapseControlIntent intent) : IActionExecutor
 	{
 		public async Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
 		{
-			if (registry.GetValue() is not { Length: > 0 } commandLine)
+			if (registry.GetValue() is not { Length: > 0 } current)
 			{
 				return ActionResult.Failed(ActionErrorCodes.NotFound, Strings.Settings.Inspector.NotInstalled());
 			}
 
+			var commandLine = CommandLineFor(current, intent.Get() == true);
+
 			try
 			{
+				if (commandLine != current) registry.SetValue(commandLine);
+
 				await process.RestartAsync(commandLine, context.CancellationToken).ConfigureAwait(false);
 				return ActionResult.Success();
+			}
+			catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or IOException)
+			{
+				return ActionResult.Failed(ActionErrorCodes.ProviderError, Strings.Settings.Inspector.WriteFailed());
 			}
 			catch (Exception ex) when (ex is InvalidOperationException or System.Management.ManagementException or System.ComponentModel.Win32Exception)
 			{
