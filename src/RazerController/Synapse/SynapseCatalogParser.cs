@@ -93,7 +93,8 @@ internal static class SynapseCatalogParser
 			activeGuid,
 			activeProfile is { } active ? ReadEffect(active) : null,
 			activeProfile is { } active2 ? ReadGamingMode(active2) : null,
-			activeProfile is { } active3 ? ReadBrightness(active3) : null);
+			activeProfile is { } active3 ? ReadBrightness(active3) : null,
+			activeProfile is { } active4 ? ReadDpiStages(active4) : null);
 	}
 
 	private static LightingEffect? ReadEffect(JsonElement profile)
@@ -113,6 +114,24 @@ internal static class SynapseCatalogParser
 		if (brightness.TryGetProperty("isEnabled", out var enabled) && enabled.ValueKind == JsonValueKind.False) return 0;
 
 		return ReadInt(brightness, "value");
+	}
+
+	/// <summary>The active profile's DPI stage slots. Only mice have them.</summary>
+	private static DpiStageSet? ReadDpiStages(JsonElement profile)
+	{
+		if (!profile.TryGetProperty("dpiStages", out var stages) || stages.ValueKind != JsonValueKind.Object) return null;
+		if (!stages.TryGetProperty("stages", out var slots) || slots.ValueKind != JsonValueKind.Array) return null;
+
+		var visible = new List<int>();
+		var slot = 0;
+		foreach (var stage in slots.EnumerateArray())
+		{
+			slot++;
+			if (stage.ValueKind == JsonValueKind.Object && stage.TryGetProperty("visible", out var shown) && shown.ValueKind == JsonValueKind.True) visible.Add(slot);
+		}
+
+		var enable = !stages.TryGetProperty("enable", out var on) || on.ValueKind != JsonValueKind.False;
+		return new DpiStageSet(ReadInt(stages, "active") ?? 0, enable, visible, slots.Clone());
 	}
 
 	private static GamingModeState? ReadGamingMode(JsonElement profile)

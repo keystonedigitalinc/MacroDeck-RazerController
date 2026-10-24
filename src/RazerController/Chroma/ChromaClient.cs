@@ -64,6 +64,20 @@ internal sealed class ChromaClient : IDisposable
 		}
 	}
 
+	/// <summary>The lighting the plugin last drew, as a lowercase effect name, or "synapse" while Synapse has the lighting.</summary>
+	public string Effect
+	{
+		get
+		{
+			lock (_shown)
+			{
+				return _shown.Count == 0
+					? "synapse"
+					: _shown.Values.MaxBy(entry => entry.Since).Lighting.Mode.ToString().ToLowerInvariant();
+			}
+		}
+	}
+
 	public async Task<ChromaOutcome> ApplyAsync(IReadOnlyList<ChromaDevice> devices, ChromaLighting lighting, CancellationToken ct)
 	{
 		await _gate.WaitAsync(ct).ConfigureAwait(false);

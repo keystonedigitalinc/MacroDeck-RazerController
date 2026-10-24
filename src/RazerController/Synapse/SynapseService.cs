@@ -114,7 +114,7 @@ internal sealed class SynapseService : BackgroundService
 
 			var eventType = step.EventType!;
 			var isApplied = step.IsApplied!;
-			var reply = await _inspector.EvaluateAsync(InspectorScripts.Command(device.Channel, eventType, step.Payload!), cancellationToken).ConfigureAwait(false);
+			var reply = await _inspector.EvaluateAsync(InspectorScripts.Command(device.Channel, eventType, step.Payload!, step.WindowUpdate), cancellationToken).ConfigureAwait(false);
 			var sent = reply is { ValueKind: System.Text.Json.JsonValueKind.Object } value
 				&& value.TryGetProperty("sent", out var flag)
 				&& flag.ValueKind == System.Text.Json.JsonValueKind.True;

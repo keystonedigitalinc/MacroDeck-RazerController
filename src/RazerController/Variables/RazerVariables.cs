@@ -1,5 +1,6 @@
 using System.Globalization;
 using KeystoneDigital.RazerController.Autostart;
+using KeystoneDigital.RazerController.Chroma;
 using KeystoneDigital.RazerController.Hid;
 using KeystoneDigital.RazerController.Synapse;
 using MacroDeck.Sdk.Variables;
@@ -25,9 +26,12 @@ internal static class RazerVariables
 		VariableDefinition.Eager("razer_keyboard_gaming_mode", VariableType.Boolean, refreshInterval: Refresh) with { Id = "keyboard-gaming-mode" },
 		VariableDefinition.Eager("razer_keyboard_brightness", VariableType.Numeric, refreshInterval: Refresh) with { Id = "keyboard-brightness" },
 		VariableDefinition.Eager("razer_mouse_brightness", VariableType.Numeric, refreshInterval: Refresh) with { Id = "mouse-brightness" },
+		VariableDefinition.Eager("razer_mouse_dpi_stage_number", VariableType.Numeric, refreshInterval: Refresh) with { Id = "mouse-dpi-stage-number" },
+		VariableDefinition.Eager("razer_mouse_effect", VariableType.Text, refreshInterval: Refresh) with { Id = "mouse-effect" },
+		VariableDefinition.Eager("razer_chroma_effect", VariableType.Text, refreshInterval: Refresh) with { Id = "chroma-effect" },
 	];
 
-	public static VariableReading Read(string localId, SynapseService synapse, MouseDpiService dpi, SetupIssue? issue = null)
+	public static VariableReading Read(string localId, SynapseService synapse, MouseDpiService dpi, SetupIssue? issue = null, ChromaClient? chroma = null)
 	{
 		var usable = synapse.Status == SynapseStatus.Ready;
 		var mouse = usable ? synapse.FirstOf(DeviceCategory.Mouse) : null;
@@ -45,6 +49,9 @@ internal static class RazerVariables
 			"keyboard-gaming-mode" => keyboard?.GamingMode?.On,
 			"keyboard-brightness" => keyboard?.Brightness,
 			"mouse-brightness" => mouse?.Brightness,
+			"mouse-dpi-stage-number" => dpiState?.StageIndex,
+			"mouse-effect" => mouse?.Effect is { } mouseEffect ? EffectName(mouseEffect.Id) : null,
+			"chroma-effect" => chroma?.Effect,
 			_ => null,
 		};
 
