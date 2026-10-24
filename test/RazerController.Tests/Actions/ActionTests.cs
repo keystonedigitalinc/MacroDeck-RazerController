@@ -261,6 +261,25 @@ public sealed class ActionTests
 	}
 
 	[Test]
+	public async Task Effect_off_switches_the_lighting_off_instead_of_sending_effect_0()
+	{
+		var (harness, fake, synapse, _) = await ReadyAsync();
+		await using var _h = harness;
+		fake.EditActiveProfile(554, p => p["brightness"] = System.Text.Json.Nodes.JsonNode.Parse("""{"isEnabled":true,"value":70}"""));
+		await synapse.RefreshAsync(default);
+		fake.OnCommand = c => fake.EditActiveProfile(554, p => p["brightness"] = System.Text.Json.Nodes.JsonNode.Parse(c.Payload.GetProperty("brightness").GetRawText()));
+
+		var outcome = await harness.Actions.ExecuteAsync("lighting-effect", P(("device", Keyboard), ("effect", "0")));
+
+		Assert.That(outcome.Succeeded, Is.True, outcome.Error?.Message);
+		var command = fake.Commands.Single();
+		Assert.That(command.Type, Is.EqualTo("ON_SET_BRIGHTNESS"));
+		Assert.That(command.Payload.GetProperty("brightness").GetProperty("isEnabled").GetBoolean(), Is.False);
+		Assert.That(command.Payload.GetProperty("brightness").GetProperty("value").GetInt32(), Is.EqualTo(70), "the level is kept for switching back on");
+		Assert.That(fake.Popups, Is.EqualTo(new[] { "Lighting: Off" }));
+	}
+
+	[Test]
 	public async Task Effect_spectrum_sends_no_setting()
 	{
 		var (harness, fake, _, _) = await ReadyAsync();

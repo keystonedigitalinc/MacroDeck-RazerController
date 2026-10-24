@@ -65,7 +65,8 @@ internal sealed record RazerDeviceInfo(
 	LightingEffect? Effect,
 	GamingModeState? GamingMode,
 	int? Brightness = null,
-	DpiStageSet? DpiStages = null)
+	DpiStageSet? DpiStages = null,
+	int? BrightnessLevel = null)
 {
 	public string? ActiveProfileName => Profiles.FirstOrDefault(p => p.Guid == ActiveProfileGuid)?.Name;
 }

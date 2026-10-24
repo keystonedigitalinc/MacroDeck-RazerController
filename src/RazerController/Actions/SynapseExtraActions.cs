@@ -83,16 +83,13 @@ internal sealed class CycleLightingAction(SynapseService synapse) : IDynamicOpti
 
 			var cycle = Cycle(context.Parameters);
 
-			var outcome = await synapse.SendAndConfirmAsync(device.Serial, current =>
-			{
-				var id = Next(cycle, current.Effect?.Id);
-				var setting = LightingEffectAction.Setting(id, context.Parameters);
-				object effectSetting = setting is null
-					? new { selectedEffectId = id }
-					: new { selectedEffectId = id, selectedEffectSetting = setting };
-
-				return DevicePlan.Send("ON_SET_EFFECTS", new { effectSetting }, latest => LightingEffectAction.Matches(latest.Effect, id, setting));
-			}, context.CancellationToken).ConfigureAwait(false);
+			// Off is the lighting switched off, not an effect, so the position in the cycle comes from the brightness too.
+			var outcome = await LightingEffectAction.ApplyAsync(
+				synapse,
+				device.Serial,
+				current => Next(cycle, current.Brightness == 0 && cycle.Contains(LightingEffectAction.Off) ? LightingEffectAction.Off : current.Effect?.Id),
+				context.Parameters,
+				context.CancellationToken).ConfigureAwait(false);
 
 			return DeviceOptions.ToResult(outcome);
 		}

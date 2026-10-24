@@ -45,12 +45,12 @@ internal static class RazerVariables
 			"mouse-dpi" => dpiState?.Dpi,
 			"mouse-dpi-stage" => dpiState is null ? null : string.Create(CultureInfo.InvariantCulture, $"{dpiState.StageIndex}/{dpiState.StageCount}"),
 			"keyboard-profile" => keyboard?.ActiveProfileName,
-			"keyboard-effect" => keyboard?.Effect is { } effect ? EffectName(effect.Id) : null,
+			"keyboard-effect" => keyboard is { Brightness: 0 } ? "Off" : keyboard?.Effect is { } effect ? EffectName(effect.Id) : null,
 			"keyboard-gaming-mode" => keyboard?.GamingMode?.On,
 			"keyboard-brightness" => keyboard?.Brightness,
 			"mouse-brightness" => mouse?.Brightness,
 			"mouse-dpi-stage-number" => dpiState?.StageIndex,
-			"mouse-effect" => mouse?.Effect is { } mouseEffect ? EffectName(mouseEffect.Id) : null,
+			"mouse-effect" => mouse is { Brightness: 0 } ? "Off" : mouse?.Effect is { } mouseEffect ? EffectName(mouseEffect.Id) : null,
 			"chroma-effect" => chroma?.Effect,
 			_ => null,
 		};
@@ -60,7 +60,7 @@ internal static class RazerVariables
 
 	// A variable value is data that widgets compare against, so it stays a stable English token rather
 	// than following the UI language.
-	private static string EffectName(int id) => id switch
+	internal static string EffectName(int id) => id switch
 	{
 		0 => "Off",
 		1 => "Static",
@@ -70,6 +70,9 @@ internal static class RazerVariables
 		5 => "Reactive",
 		6 => "Ripple",
 		7 => "Starlight",
+		8 => "Fire",
+		11 => "Ambient Awareness",
+		12 => "Audio Meter",
 		_ => id.ToString(CultureInfo.InvariantCulture),
 	};
 }

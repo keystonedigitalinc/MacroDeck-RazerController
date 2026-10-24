@@ -64,6 +64,15 @@
   <data name="Actions.LightingEffect.Effect.Label" xml:space="preserve">
     <value>Effect</value>
   </data>
+  <data name="Actions.LightingEffect.Effects.Fire" xml:space="preserve">
+    <value>Fire</value>
+  </data>
+  <data name="Actions.LightingEffect.Effects.AmbientAwareness" xml:space="preserve">
+    <value>Ambient Awareness</value>
+  </data>
+  <data name="Actions.LightingEffect.Effects.AudioMeter" xml:space="preserve">
+    <value>Audio Meter</value>
+  </data>
   <data name="Actions.LightingEffect.Color.Label" xml:space="preserve">
     <value>Colour</value>
   </data>
