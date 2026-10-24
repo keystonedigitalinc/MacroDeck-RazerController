@@ -60,7 +60,7 @@ internal static class RazerVariables
 
 	// A variable value is data that widgets compare against, so it stays a stable English token rather
 	// than following the UI language.
-	private static string EffectName(int id) => id switch
+	internal static string EffectName(int id) => id switch
 	{
 		0 => "Off",
 		1 => "Static",

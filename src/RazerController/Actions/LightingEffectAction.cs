@@ -131,12 +131,20 @@ internal sealed class LightingEffectAction(SynapseService synapse) : IDynamicOpt
 	/// <summary>Sets <paramref name="id"/> on the device: Off switches the lighting off; any effect also switches it back on.</summary>
 	internal static async Task<CommandOutcome> ApplyAsync(SynapseService synapse, string serial, Func<RazerDeviceInfo, int> pick, IReadOnlyDictionary<string, object> parameters, CancellationToken ct)
 	{
-		if (synapse.FindBySerial(serial) is { } device && pick(device) == Off) return await SetLightingAsync(synapse, serial, on: false, ct).ConfigureAwait(false);
+		if (synapse.FindBySerial(serial) is { } device && pick(device) == Off)
+		{
+			var off = await SetLightingAsync(synapse, serial, on: false, ct).ConfigureAwait(false);
+			await PopupAsync(synapse, serial, off, Off, ct).ConfigureAwait(false);
+			return off;
+		}
+
+		var chosen = -1;
 
 		var outcome = await synapse.SendAndConfirmAsync(serial, current =>
 		{
 			var id = pick(current);
 			if (id == Off) return DevicePlan.Invalid;
+			chosen = id;
 
 			var setting = Setting(id, parameters);
 			object effectSetting = setting is null
@@ -148,10 +156,21 @@ internal sealed class LightingEffectAction(SynapseService synapse) : IDynamicOpt
 
 		if (outcome is CommandOutcome.Applied or CommandOutcome.NoChange && synapse.FindBySerial(serial) is { Brightness: 0 })
 		{
-			return await SetLightingAsync(synapse, serial, on: true, ct).ConfigureAwait(false);
+			var on = await SetLightingAsync(synapse, serial, on: true, ct).ConfigureAwait(false);
+			await PopupAsync(synapse, serial, on, chosen, ct).ConfigureAwait(false);
+			return on;
 		}
 
+		await PopupAsync(synapse, serial, outcome, chosen, ct).ConfigureAwait(false);
 		return outcome;
+	}
+
+	/// <summary>Synapse's own popup naming the effect, after a change that took effect.</summary>
+	private static async Task PopupAsync(SynapseService synapse, string serial, CommandOutcome outcome, int id, CancellationToken ct)
+	{
+		if (outcome != CommandOutcome.Applied || id < 0 || synapse.FindBySerial(serial) is not { } device) return;
+
+		await synapse.ShowPopupAsync(device, "Lighting: " + Variables.RazerVariables.EffectName(id), null, null, ct).ConfigureAwait(false);
 	}
 
 	/// <summary>Whether <paramref name="effect"/> shows what was asked: the effect, and every setting field that was sent.</summary>

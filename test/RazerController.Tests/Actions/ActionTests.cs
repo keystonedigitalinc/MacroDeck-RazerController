@@ -276,6 +276,7 @@ public sealed class ActionTests
 		Assert.That(command.Type, Is.EqualTo("ON_SET_BRIGHTNESS"));
 		Assert.That(command.Payload.GetProperty("brightness").GetProperty("isEnabled").GetBoolean(), Is.False);
 		Assert.That(command.Payload.GetProperty("brightness").GetProperty("value").GetInt32(), Is.EqualTo(70), "the level is kept for switching back on");
+		Assert.That(fake.Popups, Is.EqualTo(new[] { "Lighting: Off" }));
 	}
 
 	[Test]
