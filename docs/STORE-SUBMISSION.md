@@ -80,7 +80,7 @@ Mouse DPI and Chroma lighting work without this. Until you turn it on, the plugi
 WHAT SYNAPSE CONTROL CHANGES
 - Turning it on adds --inspect=127.0.0.1:9229 to the end of Synapse's startup entry (value RazerAppEngine under HKCU\Software\Microsoft\Windows\CurrentVersion\Run). Nothing else in the entry changes.
 - Turning it off removes exactly that flag again.
-- The plugin never changes the entry or restarts Synapse on its own.
+- The plugin never changes the entry or restarts Synapse on its own. Only when the user presses Restart Razer Synapse (or restarts from the settings screen) with Synapse control on, the plugin adds the flag first and, for one minute after the restart, puts it back if Synapse rewrites its startup entry without it. Synapse does that whenever a program, not Windows, starts it.
 - If Synapse drops the flag, razer_status shows flag_missing: save the settings again.
 - If Synapse runs without the flag, razer_status shows restart_needed: save the settings with "Restart Synapse when I save" ticked, or sign out and back in.
 

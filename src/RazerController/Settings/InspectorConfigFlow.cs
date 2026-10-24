@@ -50,6 +50,7 @@ internal sealed class InspectorConfigFlow(IAutostartRegistry registry, SynapseSe
 			try
 			{
 				await process.RestartAsync(updated, cancellationToken).ConfigureAwait(false);
+				if (enable) FlagKeeper.Start(registry);
 			}
 			catch (Exception ex) when (ex is InvalidOperationException or System.Management.ManagementException or System.ComponentModel.Win32Exception)
 			{

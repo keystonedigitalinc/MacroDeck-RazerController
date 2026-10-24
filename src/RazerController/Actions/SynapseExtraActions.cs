@@ -138,6 +138,7 @@ internal sealed class RestartSynapseAction(IAutostartRegistry registry, ISynapse
 				if (commandLine != current) registry.SetValue(commandLine);
 
 				await process.RestartAsync(commandLine, context.CancellationToken).ConfigureAwait(false);
+				if (commandLine.Contains(InspectorConfigFlow.InspectFlag, StringComparison.Ordinal)) FlagKeeper.Start(registry);
 				return ActionResult.Success();
 			}
 			catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or IOException)
