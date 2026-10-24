@@ -89,6 +89,21 @@ internal sealed class SynapseService : BackgroundService
 		}
 	}
 
+	/// <summary>Shows Synapse's own popup for a change the plugin made. A popup that fails is only logged.</summary>
+	public async Task ShowPopupAsync(RazerDeviceInfo device, string header, int? dpi, int? dpiPercentage, CancellationToken cancellationToken)
+	{
+		if (!IsReachable) return;
+
+		try
+		{
+			await _inspector.EvaluateAsync(InspectorScripts.Popup(device.Channel, header, device.Name, dpi, dpiPercentage), cancellationToken).ConfigureAwait(false);
+		}
+		catch (SynapseInspectorException ex)
+		{
+			_logger.Warning("Synapse did not show the popup: {Message}", ex.Message);
+		}
+	}
+
 	public Task<CommandOutcome> SendAndConfirmAsync(
 		string serial, string eventType, object payload, Func<RazerDeviceInfo, bool> isApplied, CancellationToken cancellationToken) =>
 		SendAndConfirmAsync(serial, _ => DevicePlan.Send(eventType, payload, isApplied), cancellationToken);

@@ -77,6 +77,39 @@ internal static class InspectorScripts
 		})()
 		""";
 
+	private const string PopupTemplate = """
+		(async () => {
+		__IMPORT__
+		const target = __PAYLOAD__;
+		const electron = getElectron();
+		const page = electron.webContents.getAllWebContents().find(wc => { try { return !wc.isDestroyed() && wc.getTitle() === target.channel; } catch (_) { return false; } });
+		if (!page) return { shown: false };
+		const script = "(async () => { const t = " + JSON.stringify(target) + "; const key = 'RzWinStorage_notification_manager'; const set = (list) => window.apiElectron.doElectronAction({ action: 'setWindowStorageItem', payload: { key, value: JSON.stringify(list) } }); const id = decodeURIComponent(new URL(location.href).searchParams.get('containerId') || ''); const tick = Date.now(); const payload = Object.assign({}, t.payload, { avaiLeft: window.screen.availLeft }); await set([{ id, type: 'cycle-sensitivity', appName: 'synapse', header: t.header, footer: t.footer, persistent: true, timeout: 3000, timerTick: tick, payload }]); setTimeout(async () => { try { const all = await window.apiElectron.doElectronAction({ action: 'getWindowStorageItem', payload: { key } }); const mine = (Array.isArray(all) ? all : []).find(w => w.windowName === location.href); const list = JSON.parse((mine && mine.value) || '[]'); if (list.length === 1 && list[0].timerTick === tick) await set([]); } catch (_) {} }, 3000); return true; })()";
+		const shown = await page.executeJavaScript(script, true);
+		return { shown: shown === true };
+		})()
+		""";
+
+	/// <summary>
+	/// Shows Synapse's own on-screen popup for a device, the one Synapse shows when the mouse's DPI button is pressed:
+	/// the entry Synapse writes to its notification window storage, cleared again after three seconds as Synapse does.
+	/// Without <paramref name="dpi"/> the popup shows only the header and footer.
+	/// </summary>
+	public static string Popup(string channel, string header, string footer, int? dpi = null, int? dpiPercentage = null)
+	{
+		var target = JsonSerializer.Serialize(new
+		{
+			channel,
+			header,
+			footer,
+			payload = dpi is { } value ? new { dpiValue = value, dpiPercentage = dpiPercentage ?? 0 } : null,
+		});
+
+		return PopupTemplate
+			.Replace("__IMPORT__", ImportSnippet, StringComparison.Ordinal)
+			.Replace("__PAYLOAD__", target, StringComparison.Ordinal);
+	}
+
 	/// <summary>
 	/// Posts Synapse's own userCommand envelope on a device's BroadcastChannel. With <paramref name="window"/>, the
 	/// command carries a timerTick as Synapse's window sends it, and the update then goes to the device's "_ui"

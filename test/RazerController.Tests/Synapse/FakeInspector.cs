@@ -35,6 +35,9 @@ internal sealed class FakeInspector : IInspector
 
 	public List<SentCommand> Commands { get; } = [];
 
+	/// <summary>Popup headers the plugin asked Synapse to show, in order.</summary>
+	public List<string> Popups { get; } = [];
+
 	public int ConnectCount { get; private set; }
 
 	public Task ConnectAsync(CancellationToken cancellationToken)
@@ -61,6 +64,14 @@ internal sealed class FakeInspector : IInspector
 		if (expression == InspectorScripts.Catalog)
 		{
 			return JsonSerializer.SerializeToElement(_snapshot);
+		}
+
+		if (expression.Contains("RzWinStorage_notification_manager", StringComparison.Ordinal))
+		{
+			var target = expression.Split("const target = ", 2)[1];
+			var reader = new Utf8JsonReader(System.Text.Encoding.UTF8.GetBytes(target));
+			Popups.Add(JsonElement.ParseValue(ref reader).GetProperty("header").GetString()!);
+			return JsonSerializer.SerializeToElement(new { shown = true });
 		}
 
 		var command = DecodeCommand(expression);

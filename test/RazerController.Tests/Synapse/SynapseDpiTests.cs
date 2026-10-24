@@ -124,3 +124,33 @@ public sealed class RestartSynapseTests
 	public void With_control_off_the_entry_is_used_as_it_is() =>
 		Assert.That(RestartSynapseAction.CommandLineFor(Entry, controlOn: false), Is.EqualTo(Entry));
 }
+
+[TestFixture]
+public sealed class SynapsePopupTests
+{
+	private const string Slots = """[{"x":1000,"y":1000,"visible":true},{"x":1200,"y":1200,"visible":true},{"x":16000,"y":16000,"visible":false}]""";
+
+	[Test]
+	public void The_active_stage_number_and_the_mouse_maximum_come_from_the_slots()
+	{
+		var stages = new DpiStageSet(2, true, [1, 2], Fixture.Parse(Slots));
+
+		Assert.That(stages.ActiveNumber, Is.EqualTo(2));
+		Assert.That(stages.MaxDpi, Is.EqualTo(16000));
+	}
+
+	[Test]
+	public void Popup_text_stays_inert()
+	{
+		const string hostile = "x\"); require('child_process').exec('calc'); (\"";
+		var script = InspectorScripts.Popup("usb_5426_103_{X}_mw", hostile, hostile, 1200, 8);
+
+		var afterTarget = script.Split("const target = ", 2)[1];
+		var reader = new Utf8JsonReader(System.Text.Encoding.UTF8.GetBytes(afterTarget));
+		var target = JsonElement.ParseValue(ref reader);
+
+		Assert.That(target.GetProperty("header").GetString(), Is.EqualTo(hostile));
+		Assert.That(target.GetProperty("payload").GetProperty("dpiValue").GetInt32(), Is.EqualTo(1200));
+		Assert.That(afterTarget[(int)reader.BytesConsumed..].TrimStart(), Does.StartWith(";"));
+	}
+}

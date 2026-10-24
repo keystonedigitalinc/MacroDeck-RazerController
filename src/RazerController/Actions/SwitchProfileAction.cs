@@ -107,6 +107,11 @@ internal sealed class SwitchProfileAction(SynapseService synapse) : IDynamicOpti
 				return DevicePlan.Send("ON_SWITCH_PROFILE", new { newActiveProfileGUID = target }, latest => latest.ActiveProfileGuid == target);
 			}, context.CancellationToken).ConfigureAwait(false);
 
+			if (outcome == CommandOutcome.Applied && synapse.FindBySerial(device.Serial) is { ActiveProfileName: { } name } current)
+			{
+				await synapse.ShowPopupAsync(current, "Profile: " + name, null, null, context.CancellationToken).ConfigureAwait(false);
+			}
+
 			return DeviceOptions.ToResult(outcome, () => ActionResult.Failed(ActionErrorCodes.NotFound, Strings.Actions.Errors.ProfileNotFound()));
 		}
 	}
