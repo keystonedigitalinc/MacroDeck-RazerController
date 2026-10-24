@@ -38,7 +38,7 @@ Chroma lighting does not use the debug port. It talks to the Razer Chroma SDK's 
 | Action | What it does |
 | --- | --- |
 | Switch Synapse profile | Picks a device, then one of: a chosen profile, next, previous, or cycle through chosen profiles |
-| Synapse lighting (saved to profile) | Off, Static, Breathing, Spectrum, Wave, Reactive, Ripple or Starlight, saved in the Synapse profile, with the effect's own settings: colour, second colour or random colours (Breathing, Starlight), duration (Reactive, Starlight), direction (Wave). Needs Synapse control |
+| Synapse lighting (saved to profile) | Off, Static, Breathing, Spectrum, Wave, Reactive, Ripple, Starlight, Fire, Ambient Awareness or Audio Meter, saved in the Synapse profile. Off switches the profile's lighting off, as Synapse's own switch does; picking an effect switches it back on. Effects a device does not have report "Synapse did not apply the change", with the effect's own settings: colour, second colour or random colours (Breathing, Starlight), duration (Reactive, Starlight), direction (Wave). Needs Synapse control |
 | Synapse brightness (saved to profile) | Sets a device's lighting brightness in its Synapse profile, or makes it brighter or dimmer by a step. 0 switches the lighting off. Needs Synapse control |
 | Chroma lighting (temporary, no setup) | Static colour, Breathing (one or two colours), Spectrum cycling, Wave or Off, with brightness and speed, on all Razer devices or one device type, through the Razer Chroma SDK. The plugin draws the animated effects itself. Works without Synapse control. Needs the Chroma module in Synapse with Chroma apps allowed. The colour lasts while Macro Deck runs; **Synapse lighting (give control back)** returns to the profile |
 | Gaming mode | On, Off or Toggle. Gaming mode disables the Windows key |
@@ -61,7 +61,7 @@ After a profile switch, a lighting change or a DPI stage change made through Syn
 | `razer_mouse_dpi` | Current mouse DPI |
 | `razer_mouse_dpi_stage` | `stage/count`, `0/n` when on a temporary DPI |
 | `razer_keyboard_profile` | Active profile of the first keyboard |
-| `razer_keyboard_effect` | `Off`, `Static`, `Breathing`, `Spectrum`, `Wave`, `Reactive`, `Ripple` or `Starlight` |
+| `razer_keyboard_effect` | `Off`, `Static`, `Breathing`, `Spectrum`, `Wave`, `Reactive`, `Ripple`, `Starlight`, `Fire`, `Ambient Awareness` or `Audio Meter`. `Off` while the lighting is switched off |
 | `razer_keyboard_gaming_mode` | `true` or `false` |
 | `razer_keyboard_brightness` | Lighting brightness of the first keyboard, 0 to 100 |
 | `razer_mouse_dpi_stage_number` | Current mouse DPI stage as a number, `0` when on a temporary DPI |

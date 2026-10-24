@@ -32,6 +32,9 @@ internal sealed class LightingEffectAction(SynapseService synapse) : IDynamicOpt
 		(5, () => Strings.Actions.LightingEffect.Effects.Reactive()),
 		(6, () => Strings.Actions.LightingEffect.Effects.Ripple()),
 		(7, () => Strings.Actions.LightingEffect.Effects.Starlight()),
+		(8, () => Strings.Actions.LightingEffect.Effects.Fire()),
+		(11, () => Strings.Actions.LightingEffect.Effects.AmbientAwareness()),
+		(12, () => Strings.Actions.LightingEffect.Effects.AudioMeter()),
 	];
 
 	public string Id => "lighting-effect";
