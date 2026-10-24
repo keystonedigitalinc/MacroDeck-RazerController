@@ -30,6 +30,13 @@ internal sealed record DpiStageSet(int Active, bool Enable, IReadOnlyList<int> V
 	/// <summary>The 1-based slot of the <paramref name="number"/>th stage in use, or null.</summary>
 	public int? SlotOf(int number) => number >= 1 && number <= Visible.Count ? Visible[number - 1] : null;
 
+	/// <summary>The X DPI stored in a 1-based slot, or null.</summary>
+	public int? DpiOf(int slot) =>
+		Raw.ValueKind == JsonValueKind.Array && slot >= 1 && slot <= Raw.GetArrayLength()
+		&& Raw[slot - 1].ValueKind == JsonValueKind.Object && Raw[slot - 1].TryGetProperty("x", out var x) && x.TryGetInt32(out var dpi)
+			? dpi
+			: null;
+
 	/// <summary>The slot one stage up or down from the active one, or null at either end.</summary>
 	public int? Step(bool up)
 	{

@@ -1,3 +1,4 @@
+using System.Globalization;
 using KeystoneDigital.RazerController.Hid;
 using KeystoneDigital.RazerController.Synapse;
 using MacroDeck.Localization;
@@ -87,7 +88,7 @@ internal sealed class TemporaryDpiAction(MouseDpiService dpi) : IActionDefinitio
 	}
 }
 
-internal sealed class DpiStageAction(MouseDpiService dpi, SynapseService synapse) : IActionDefinition
+internal sealed class DpiStageAction(MouseDpiService dpi, SynapseService synapse) : IDynamicOptionsActionDefinition
 {
 	private const string StageParameter = "stage";
 
@@ -99,12 +100,36 @@ internal sealed class DpiStageAction(MouseDpiService dpi, SynapseService synapse
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
-		ActionParameter.Number(StageParameter, label: Strings.Actions.DpiStage.Stage.Label(), min: 1, max: 5, step: 1, defaultValue: 1, required: true),
+		ActionParameter.DynamicChoice(StageParameter, label: Strings.Actions.DpiStage.Stage.Label(), required: true),
 	];
 
 	public MacroDeckPlatform Platforms => MacroDeckPlatform.Windows;
 
 	public IActionExecutor CreateExecutor() => new Executor(dpi, synapse);
+
+	/// <summary>The stages of the mouse's active profile with their DPI, or stages 1 to 5 when Synapse is not reachable.</summary>
+	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context, CancellationToken cancellationToken) =>
+		Task.FromResult(new DynamicOptionsResult { Options = Options(synapse.FirstOf(DeviceCategory.Mouse)?.DpiStages) });
+
+	internal static List<ActionParameterOption> Options(DpiStageSet? stages)
+	{
+		if (stages is null || stages.Visible.Count == 0)
+		{
+			return [.. Enumerable.Range(1, 5).Select(number => new ActionParameterOption { Value = number.ToString(CultureInfo.InvariantCulture), Label = Strings.Actions.DpiStage.OptionPlain(number.ToString(CultureInfo.InvariantCulture)) })];
+		}
+
+		return [.. stages.Visible.Select((slot, index) =>
+		{
+			var number = (index + 1).ToString(CultureInfo.InvariantCulture);
+			return new ActionParameterOption
+			{
+				Value = number,
+				Label = stages.DpiOf(slot) is { } value
+					? Strings.Actions.DpiStage.Option(number, value.ToString(CultureInfo.InvariantCulture))
+					: Strings.Actions.DpiStage.OptionPlain(number),
+			};
+		})];
+	}
 
 	private sealed class Executor(MouseDpiService dpi, SynapseService synapse) : IActionExecutor
 	{

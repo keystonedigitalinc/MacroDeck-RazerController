@@ -85,6 +85,19 @@ public sealed class SynapseDpiTests
 	}
 
 	[Test]
+	public void The_stage_list_shows_each_stage_in_use_with_its_dpi()
+	{
+		var options = DpiStageAction.Options(Stages(1));
+
+		Assert.That(options.Select(o => o.Value), Is.EqualTo(new[] { "1", "2", "3" }));
+		Assert.That(options[1].Label.ToString(), Does.Contain("DpiStage.Option("), "the label with the stage's DPI");
+	}
+
+	[Test]
+	public void Without_synapse_the_stage_list_offers_stages_1_to_5() =>
+		Assert.That(DpiStageAction.Options(null).Select(o => o.Value), Is.EqualTo(new[] { "1", "2", "3", "4", "5" }));
+
+	[Test]
 	public void Cycling_lighting_wraps_and_starts_from_the_first_unknown_effect()
 	{
 		Assert.That(CycleLightingAction.Next([1, 2, 3, 4], 2), Is.EqualTo(3));

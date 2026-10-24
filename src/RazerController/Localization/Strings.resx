@@ -157,6 +157,12 @@
   <data name="Actions.RestartSynapse.Description" xml:space="preserve">
     <value>Closes Razer Synapse and starts it again from its own startup entry, so Synapse control applies. Synapse's windows close for a few seconds. Runs only when you press the button.</value>
   </data>
+  <data name="Actions.DpiStage.Option" xml:space="preserve">
+    <value>Stage {number} ({dpi} DPI)</value>
+  </data>
+  <data name="Actions.DpiStage.OptionPlain" xml:space="preserve">
+    <value>Stage {number}</value>
+  </data>
   <data name="Actions.Errors.NoSuchStage" xml:space="preserve">
     <value>The mouse has no DPI stage with that number in its active profile.</value>
   </data>
