@@ -37,6 +37,12 @@ internal sealed record DpiStageSet(int Active, bool Enable, IReadOnlyList<int> V
 			? dpi
 			: null;
 
+	/// <summary>The active stage's number among the stages in use, or null.</summary>
+	public int? ActiveNumber => Visible.ToList().IndexOf(Active) is var index and >= 0 ? index + 1 : null;
+
+	/// <summary>The highest DPI in any slot; Synapse fills unused slots with the mouse's maximum.</summary>
+	public int MaxDpi => Enumerable.Range(1, Raw.ValueKind == JsonValueKind.Array ? Raw.GetArrayLength() : 0).Select(DpiOf).Max() ?? 0;
+
 	/// <summary>The slot one stage up or down from the active one, or null at either end.</summary>
 	public int? Step(bool up)
 	{

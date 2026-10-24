@@ -184,6 +184,15 @@ internal static class SynapseDpi
 
 		// The DPI variables read the mouse; refresh them now instead of at the next poll.
 		await dpi.RefreshAsync(ct).ConfigureAwait(false);
+
+		if (outcome == CommandOutcome.Applied
+			&& synapse.FindBySerial(mouse.Serial) is { DpiStages: { ActiveNumber: { } number } stages } current
+			&& stages.DpiOf(stages.Active) is { } value)
+		{
+			var percentage = stages.MaxDpi > 0 ? (int)Math.Round(value * 100.0 / stages.MaxDpi) : 0;
+			await synapse.ShowPopupAsync(current, string.Create(CultureInfo.InvariantCulture, $"DPI Stage {number}"), value, percentage, ct).ConfigureAwait(false);
+		}
+
 		return DeviceOptions.ToResult(outcome);
 	}
 }

@@ -110,3 +110,67 @@ public sealed class SynapseDpiTests
 	public void No_ticked_effects_cycles_the_common_ones() =>
 		Assert.That(CycleLightingAction.Cycle(new Dictionary<string, object>()), Is.EqualTo(new[] { 1, 2, 3, 4 }));
 }
+
+[TestFixture]
+public sealed class RestartSynapseTests
+{
+	private const string Entry = @"""C:\Program Files\Razer\RazerAppEngine\RazerAppEngine.exe"" --autoStart=1";
+
+	[Test]
+	public void With_control_on_the_restart_puts_the_flag_back() =>
+		Assert.That(RestartSynapseAction.CommandLineFor(Entry, controlOn: true), Does.Contain(KeystoneDigital.RazerController.Settings.InspectorConfigFlow.InspectFlag));
+
+	[Test]
+	public void With_control_off_the_entry_is_used_as_it_is() =>
+		Assert.That(RestartSynapseAction.CommandLineFor(Entry, controlOn: false), Is.EqualTo(Entry));
+}
+
+[TestFixture]
+public sealed class SynapsePopupTests
+{
+	private const string Slots = """[{"x":1000,"y":1000,"visible":true},{"x":1200,"y":1200,"visible":true},{"x":16000,"y":16000,"visible":false}]""";
+
+	[Test]
+	public void The_active_stage_number_and_the_mouse_maximum_come_from_the_slots()
+	{
+		var stages = new DpiStageSet(2, true, [1, 2], Fixture.Parse(Slots));
+
+		Assert.That(stages.ActiveNumber, Is.EqualTo(2));
+		Assert.That(stages.MaxDpi, Is.EqualTo(16000));
+	}
+
+	[Test]
+	public void Popup_text_stays_inert()
+	{
+		const string hostile = "x\"); require('child_process').exec('calc'); (\"";
+		var script = InspectorScripts.Popup("usb_5426_103_{X}_mw", hostile, hostile, 1200, 8);
+
+		var afterTarget = script.Split("const target = ", 2)[1];
+		var reader = new Utf8JsonReader(System.Text.Encoding.UTF8.GetBytes(afterTarget));
+		var target = JsonElement.ParseValue(ref reader);
+
+		Assert.That(target.GetProperty("header").GetString(), Is.EqualTo(hostile));
+		Assert.That(target.GetProperty("payload").GetProperty("dpiValue").GetInt32(), Is.EqualTo(1200));
+		Assert.That(afterTarget[(int)reader.BytesConsumed..].TrimStart(), Does.StartWith(";"));
+	}
+}
+
+[TestFixture]
+public sealed class PopupPreferenceTests
+{
+	[Test]
+	public void Popups_are_on_until_turned_off_and_the_choice_survives()
+	{
+		var directory = Path.Combine(Path.GetTempPath(), "razer-popups-" + Guid.NewGuid().ToString("N"));
+		try
+		{
+			Assert.That(new FilePopupPreference(directory).Enabled, Is.True);
+			new FilePopupPreference(directory).Enabled = false;
+			Assert.That(new FilePopupPreference(directory).Enabled, Is.False);
+		}
+		finally
+		{
+			if (Directory.Exists(directory)) Directory.Delete(directory, recursive: true);
+		}
+	}
+}

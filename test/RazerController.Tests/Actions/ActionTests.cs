@@ -72,6 +72,7 @@ public sealed class ActionTests
 
 		Assert.That(outcome.Succeeded, Is.True, outcome.Error?.Message);
 		Assert.That(synapse.FindBySerial(Mouse)!.ActiveProfileGuid, Is.EqualTo(target));
+		Assert.That(fake.Popups, Is.EqualTo(new[] { "Profile: " + synapse.FindBySerial(Mouse)!.ActiveProfileName }), "Synapse's popup names the new profile");
 	}
 
 	[Test]

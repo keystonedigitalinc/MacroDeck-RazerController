@@ -17,6 +17,7 @@ internal sealed class InspectorConfigFlow(IAutostartRegistry registry, SynapseSe
 	private const string StepId = "inspector";
 	private const string EnabledField = "enabled";
 	private const string RestartField = "restart";
+	private const string PopupsField = "popups";
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken) =>
 		Task.FromResult(ConfigFlowResult.Step(BuildStep()));
@@ -30,6 +31,7 @@ internal sealed class InspectorConfigFlow(IAutostartRegistry registry, SynapseSe
 		}
 
 		var enable = ReadBool(input, EnabledField);
+		synapse.Popups.Enabled = !input.ContainsKey(PopupsField) || ReadBool(input, PopupsField);
 		intent.Set(enable);
 		var updated = enable ? AutostartCommandLine.AppendFlag(current, InspectFlag) : AutostartCommandLine.RemoveFlag(current, InspectFlag);
 		if (updated != current)
@@ -50,6 +52,7 @@ internal sealed class InspectorConfigFlow(IAutostartRegistry registry, SynapseSe
 			try
 			{
 				await process.RestartAsync(updated, cancellationToken).ConfigureAwait(false);
+				if (enable) FlagKeeper.Start(registry);
 			}
 			catch (Exception ex) when (ex is InvalidOperationException or System.Management.ManagementException or System.ComponentModel.Win32Exception)
 			{
@@ -57,9 +60,11 @@ internal sealed class InspectorConfigFlow(IAutostartRegistry registry, SynapseSe
 			}
 		}
 
+		// The host keeps the submitted form and fills the screen from it next time. "enabled" stays the toggle's own
+		// true/false (a text "true" shows as off), and "restart" is stored as off so it never comes back ticked.
 		return ConfigFlowResult.Complete(
 			"Razer App Controller",
-			new Dictionary<string, ConfigFlowValue> { [EnabledField] = ConfigFlowValue.Plain(enable ? "true" : "false") });
+			new Dictionary<string, ConfigFlowValue> { [RestartField] = ConfigFlowValue.Plain("false") });
 	}
 
 	private ConfigFlowStep BuildStep()
@@ -83,6 +88,7 @@ internal sealed class InspectorConfigFlow(IAutostartRegistry registry, SynapseSe
 			[
 				ActionParameter.Toggle(EnabledField, label: Strings.Settings.Inspector.Enabled.Label(), description: Strings.Settings.Inspector.Enabled.Description(), defaultValue: enabled),
 				ActionParameter.Toggle(RestartField, label: Strings.Settings.Inspector.Restart.Label(), description: Strings.Settings.Inspector.Restart.Description(), defaultValue: false),
+				ActionParameter.Toggle(PopupsField, label: Strings.Settings.Inspector.Popups.Label(), description: Strings.Settings.Inspector.Popups.Description(), defaultValue: synapse.Popups.Enabled),
 			],
 		};
 	}

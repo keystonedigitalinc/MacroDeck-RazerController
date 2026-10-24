@@ -39,7 +39,7 @@ public sealed class RazerIntegration : IPluginIntegration, IVariableProvider, IC
 			new DpiStageAction(dpi, synapse),
 			new ChromaLightingAction(chroma),
 			new CycleLightingAction(synapse),
-			new RestartSynapseAction(autostart, process),
+			new RestartSynapseAction(autostart, process, intent),
 		];
 	}
 

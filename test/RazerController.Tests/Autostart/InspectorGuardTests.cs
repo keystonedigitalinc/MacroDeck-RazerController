@@ -144,3 +144,28 @@ public sealed class InspectorGuardTests
 		}
 	}
 }
+
+[TestFixture]
+public sealed class FlagKeeperTests
+{
+	[Test]
+	public async Task The_flag_comes_back_when_Synapse_drops_it_after_a_restart()
+	{
+		var registry = new FakeAutostartRegistry(@"""C:\Razer\RazerAppEngine.exe"" --autoStart=1");
+
+		await FlagKeeper.KeepAsync(registry, TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(10), CancellationToken.None);
+
+		Assert.That(registry.Value, Does.EndWith(KeystoneDigital.RazerController.Settings.InspectorConfigFlow.InspectFlag));
+	}
+
+	[Test]
+	public async Task An_entry_that_has_the_flag_is_left_alone()
+	{
+		var entry = @"""C:\Razer\RazerAppEngine.exe"" --autoStart=1 " + KeystoneDigital.RazerController.Settings.InspectorConfigFlow.InspectFlag;
+		var registry = new FakeAutostartRegistry(entry);
+
+		await FlagKeeper.KeepAsync(registry, TimeSpan.FromMilliseconds(50), TimeSpan.FromMilliseconds(10), CancellationToken.None);
+
+		Assert.That(registry.Value, Is.EqualTo(entry));
+	}
+}

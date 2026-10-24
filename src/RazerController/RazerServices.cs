@@ -18,7 +18,7 @@ internal static class RazerServices
 		services.AddSingleton(sp =>
 		{
 			var intent = sp.GetRequiredService<ISynapseControlIntent>();
-			return new SynapseService(sp.GetRequiredService<IInspector>(), sp.GetRequiredService<ILogger>(), controlEnabled: () => intent.Get() == true);
+			return new SynapseService(sp.GetRequiredService<IInspector>(), sp.GetRequiredService<ILogger>(), controlEnabled: () => intent.Get() == true) { Popups = FilePopupPreference.FromEnvironment() };
 		});
 		services.AddSingleton(sp => MouseDpiService.CreateDefault(sp.GetRequiredService<ILogger>()));
 		services.AddSingleton<IAutostartRegistry, WindowsAutostartRegistry>();

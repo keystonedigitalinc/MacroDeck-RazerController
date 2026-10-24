@@ -23,7 +23,7 @@ Mouse DPI and Chroma lighting work without step 3. Profiles, Synapse lighting ef
 
 Turning it on adds `--inspect=127.0.0.1:9229` to the end of the `RazerAppEngine` value under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`. Nothing else in that entry changes. Turning it off removes exactly that flag again and leaves the rest of the entry as it is. Both take effect the next time Synapse starts.
 
-The plugin never changes the entry or restarts Synapse on its own. Synapse sometimes rewrites its startup entry and drops the flag. Then `razer_status` shows `flag_missing`, and you save the settings again to put it back. If Synapse is running without the flag, `razer_status` shows `restart_needed`. Open the plugin's settings, tick **Restart Synapse when I save** and save. Or sign out of Windows and back in.
+The plugin never changes the entry or restarts Synapse on its own. When Synapse is restarted by a program instead of by Windows, it rewrites its startup entry without the flag; so after a restart you ask for (the **Restart Razer Synapse** action, or the settings screen's restart), the plugin puts the flag back for one minute if Synapse drops it. Synapse sometimes rewrites its startup entry and drops the flag at other times too. Then `razer_status` shows `flag_missing`, and you save the settings again to put it back. If Synapse is running without the flag, `razer_status` shows `restart_needed`. Open the plugin's settings, tick **Restart Synapse when I save** and save. Or sign out of Windows and back in.
 
 ## Security
 
@@ -49,6 +49,8 @@ Chroma lighting does not use the debug port. It talks to the Razer Chroma SDK's 
 | Restart Razer Synapse | Closes Synapse and starts it again from its own startup entry, so a change to Synapse control applies. Runs only when you press it |
 
 Each Synapse action waits until Synapse confirms the change, about 1.5 seconds at most. Otherwise it reports "Synapse did not apply the change".
+
+After a profile switch or a DPI stage change made through Synapse, Synapse shows its own on-screen popup ("Profile: <name>", or "DPI Stage <n>" with the DPI bar), the same popup it shows for the mouse's DPI buttons. It disappears after 3 seconds. Turn it off with **Show Synapse popups** in the plugin's settings.
 
 ## Variables
 
