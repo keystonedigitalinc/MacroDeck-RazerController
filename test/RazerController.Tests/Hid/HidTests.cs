@@ -84,4 +84,20 @@ public sealed class HidTests
 
 	[Test]
 	public void Stepping_down_from_a_temporary_dpi_lands_on_the_next_lower_stage() => Assert.That(DpiStepper.NextStage(ThreeStages, 1000, up: false), Is.EqualTo((byte)1));
+
+	[Test]
+	public void Stage_number_counts_in_dpi_order()
+	{
+		var unordered = new DpiStages(1, [new(1, 3200, 3200), new(2, 800, 800), new(3, 1600, 1600)]);
+
+		Assert.That(DpiStepper.StageAt(unordered, 1), Is.EqualTo((byte)2));
+		Assert.That(DpiStepper.StageAt(unordered, 3), Is.EqualTo((byte)1));
+	}
+
+	[Test]
+	public void Stage_number_outside_the_stages_is_null()
+	{
+		Assert.That(DpiStepper.StageAt(ThreeStages, 0), Is.Null);
+		Assert.That(DpiStepper.StageAt(ThreeStages, 4), Is.Null);
+	}
 }

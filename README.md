@@ -7,7 +7,7 @@ Control Razer devices from Macro Deck 3 buttons while Razer Synapse 4 keeps runn
 - switch, step or cycle Synapse profiles on any Razer device
 - set a device's lighting effect in its Synapse profile, or use Chroma lighting (static, breathing, spectrum, wave, with brightness and speed) without Synapse control
 - toggle a keyboard's gaming mode
-- step or temporarily set the mouse's DPI
+- step the mouse's DPI, jump to a DPI stage, or set a temporary DPI
 
 Tested on a Razer Naga Trinity and a Razer Cynosa Chroma with Synapse 4.0.827.
 
@@ -44,6 +44,7 @@ Chroma lighting does not use the debug port. It talks to the Razer Chroma SDK's 
 | Gaming mode | On, Off or Toggle. Gaming mode disables the Windows key |
 | Step mouse DPI | One DPI stage up or down within the active profile |
 | Temporary mouse DPI | A DPI value until the next profile switch or DPI step |
+| Go to mouse DPI stage | Jumps to stage 1 to 5 of the active profile, counted from the lowest DPI like `razer_mouse_dpi_stage` |
 
 Each Synapse action waits until Synapse confirms the change, about 1.5 seconds at most. Otherwise it reports "Synapse did not apply the change".
 

@@ -34,6 +34,7 @@ public sealed class RazerIntegration : IPluginIntegration, IVariableProvider, IC
 			new GamingModeAction(synapse),
 			new StepDpiAction(dpi),
 			new TemporaryDpiAction(dpi),
+			new DpiStageAction(dpi),
 			new ChromaLightingAction(chroma),
 		];
 	}

@@ -133,6 +133,18 @@
   <data name="Actions.TemporaryDpi.Dpi.Label" xml:space="preserve">
     <value>DPI</value>
   </data>
+  <data name="Actions.DpiStage.Name" xml:space="preserve">
+    <value>Go to mouse DPI stage</value>
+  </data>
+  <data name="Actions.DpiStage.Description" xml:space="preserve">
+    <value>Switches the Razer mouse to one of its DPI stages in the active profile. Stage 1 is the lowest DPI, the same numbering as the razer_mouse_dpi_stage variable.</value>
+  </data>
+  <data name="Actions.DpiStage.Stage.Label" xml:space="preserve">
+    <value>Stage</value>
+  </data>
+  <data name="Actions.Errors.NoSuchStage" xml:space="preserve">
+    <value>The mouse has no DPI stage with that number in its active profile.</value>
+  </data>
   <data name="Actions.Errors.SynapseUnavailable" xml:space="preserve">
     <value>Razer Synapse is not reachable. Check that Synapse is running with Synapse control enabled in this plugin's settings.</value>
   </data>

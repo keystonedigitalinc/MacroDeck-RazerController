@@ -36,6 +36,7 @@ internal sealed class StepDpiAction(MouseDpiService dpi) : IActionDefinition
 	{
 		DpiOutcome.Applied => ActionResult.Success(),
 		DpiOutcome.NoMouse => ActionResult.Failed(ActionErrorCodes.NotConnected, Strings.Actions.Errors.NoMouse()),
+		DpiOutcome.NoSuchStage => ActionResult.Failed(ActionErrorCodes.ProviderError, Strings.Actions.Errors.NoSuchStage()),
 		_ => ActionResult.Failed(ActionErrorCodes.ProviderError, Strings.Actions.Errors.MouseFailed()),
 	};
 
@@ -78,6 +79,39 @@ internal sealed class TemporaryDpiAction(MouseDpiService dpi) : IActionDefinitio
 			}
 
 			return StepDpiAction.ToResult(await dpi.SetTemporaryAsync(value, context.CancellationToken).ConfigureAwait(false));
+		}
+	}
+}
+
+internal sealed class DpiStageAction(MouseDpiService dpi) : IActionDefinition
+{
+	private const string StageParameter = "stage";
+
+	public string Id => "dpi-stage";
+
+	public LocalizedText Name => Strings.Actions.DpiStage.Name();
+
+	public LocalizedText Description => Strings.Actions.DpiStage.Description();
+
+	public IReadOnlyList<ActionParameter> Parameters { get; } =
+	[
+		ActionParameter.Number(StageParameter, label: Strings.Actions.DpiStage.Stage.Label(), min: 1, max: 5, step: 1, defaultValue: 1, required: true),
+	];
+
+	public MacroDeckPlatform Platforms => MacroDeckPlatform.Windows;
+
+	public IActionExecutor CreateExecutor() => new Executor(dpi);
+
+	private sealed class Executor(MouseDpiService dpi) : IActionExecutor
+	{
+		public async Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
+		{
+			if (ParameterReader.Int(context.Parameters, StageParameter) is not { } stage)
+			{
+				return DeviceOptions.Invalid(Strings.Actions.DpiStage.Stage.Label());
+			}
+
+			return StepDpiAction.ToResult(await dpi.GoToStageAsync(stage, context.CancellationToken).ConfigureAwait(false));
 		}
 	}
 }
